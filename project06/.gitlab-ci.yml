@@ -1,0 +1,43 @@
+stages:
+  - dev
+  - staging
+  - prod
+
+variables:
+  TF_WORKING_DIR: "environments/$CI_COMMIT_REF_NAME"
+
+dev:
+  stage: dev
+  only:
+    - dev
+  script:
+    - terraform init
+    - terraform plan --var-file="$TF_WORKING_DIR/terraform.tfvars" --auto-approve
+
+staging:
+  stage: staging
+  only: 
+    - staging
+  script:
+    - terraform init
+    - terraform apply --var-file="$TF_WORKING_DIR/terraform.tfvars" --auto-approve
+
+
+prod:
+  stage: prod
+  only:
+    - prod # main or master are also possible
+  script:
+    - terraform init
+    - terraform apply --var-file="$TF_WORKING_DIR/terraform.tfvars" --auto-approve
+
+
+# uncomment this to destroy stage and dev components
+destroy:
+  stage: destroy
+  only:
+    - dev
+    - staging
+  script:
+    - terraform init
+    - terraform destroy --var-file="$TF_WORKING_DIR/terraform.tfvars" --auto-approve
